@@ -78,8 +78,8 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 rounded-2xl border border-[#1e1e2e] bg-[#0f131c] px-4 py-3 text-sm leading-6 text-[#94A3B8]">
-          데모 환경에서는 어떤 아이디로도 들어갈 수 있고, 실제 API를 연결하면 문서 기준
-          로그인 흐름으로 바로 교체됩니다.
+          회원가입은 따로 없어요. 관리자 화면에서 만든 어르신 계정으로 로그인할 수
+          있습니다.
         </div>
       </div>
     </main>

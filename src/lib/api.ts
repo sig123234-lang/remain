@@ -47,11 +47,10 @@ function mockReply(content: string) {
 
 export async function login(username: string, password: string): Promise<AuthResult> {
   if (!API_BASE && canUseDemoMode()) {
-    return {
-      token: "local-demo-token",
-      userId: "demo-user",
-      name: username === "caregiver" ? "김기억" : "홍길동",
-    };
+    return fetchJson<AuthResult>("/api/demo/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+    });
   }
 
   assertApiConfigured();

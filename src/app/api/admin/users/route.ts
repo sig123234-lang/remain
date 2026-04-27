@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     return new NextResponse("이미 존재하는 아이디입니다.", { status: 409 });
   }
 
-  const user = addUser({ name, username });
+  const user = addUser({ name, username, password });
 
   return NextResponse.json({ user });
 }

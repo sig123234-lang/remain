@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [token, setToken] = useState<string | null>(() => getAdminToken());
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [form, setForm] = useState({ name: "", username: "", password: "" });
@@ -38,6 +39,7 @@ export default function AdminPage() {
   async function handleAdminLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setSuccessMessage("");
     setLoading(true);
 
     try {
@@ -59,10 +61,14 @@ export default function AdminPage() {
     }
 
     setError("");
+    setSuccessMessage("");
 
     try {
       const result = await createAdminUser(token, form);
       setUsers((prev) => [result.user, ...prev]);
+      setSuccessMessage(
+        `${form.name} 어르신 계정을 만들었어요. 로그인 아이디는 ${form.username} 입니다.`,
+      );
       setForm({ name: "", username: "", password: "" });
     } catch (createError) {
       const message =
@@ -150,7 +156,7 @@ export default function AdminPage() {
           <div className="panel rounded-[32px] p-6">
             <h2 className="text-2xl font-bold text-white">새 계정 추가</h2>
             <p className="mt-2 text-sm leading-6 text-[#94A3B8]">
-              이름, 아이디, 비밀번호를 입력하면 새 사용자 계정을 만들 수 있어요.
+              어르신은 회원가입 없이, 여기서 만든 계정으로 바로 로그인합니다.
             </p>
 
             <form className="mt-6 space-y-4" onSubmit={handleCreateUser}>
@@ -182,8 +188,13 @@ export default function AdminPage() {
                   {error}
                 </p>
               ) : null}
+              {successMessage ? (
+                <p className="rounded-2xl border border-[#244832] bg-[#0f1b16] px-4 py-3 text-sm text-[#bce6c8]">
+                  {successMessage}
+                </p>
+              ) : null}
               <button className="primary-button w-full" type="submit">
-                계정 만들기
+                어르신 계정 만들기
               </button>
             </form>
           </div>
