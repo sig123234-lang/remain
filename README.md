@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# remAIn Web App
 
-## Getting Started
+문서의 `v2` 사양을 기준으로 만든 `Next.js` 웹앱 스타터입니다.
 
-First, run the development server:
+## 포함된 화면
+
+- `/login`: 사용자 로그인
+- `/home`: 홈 대시보드
+- `/conversation`: 텍스트 + Web Speech API 기반 대화 화면
+- `/history`: 이전 대화 기록
+- `/admin`: 관리자 로그인 및 사용자 관리
+
+## 실행
 
 ```bash
+npm install
+cp .env.local.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+개발 중에는 `NEXT_PUBLIC_API_URL`이 없어도 데모 모드로 동작할 수 있습니다.
+운영 배포에서는 기본적으로 데모 모드가 꺼지며, 실제 API 또는 명시적 데모 설정이 필요합니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 관리자 페이지
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`이 필요합니다.
+- 인메모리 관리자 API는 기본 비활성화입니다.
+- 데모 관리자까지 함께 배포하려면 `ENABLE_INMEMORY_ADMIN=true`를 명시적으로 설정해야 합니다.
 
-## Learn More
+## Vercel 배포 전 필수
 
-To learn more about Next.js, take a look at the following resources:
+- `NEXT_PUBLIC_API_URL` 설정
+- `ADMIN_USERNAME` 설정
+- `ADMIN_PASSWORD` 설정
+- `ADMIN_SESSION_SECRET` 설정
+- 실제 운영이면 `ENABLE_INMEMORY_ADMIN=false` 유지
+- 데모 배포만 할 거면 `NEXT_PUBLIC_ENABLE_DEMO=true` 명시
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 권장 배포 방식
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 프론트: Vercel
+- 대화 API: AWS Lambda + API Gateway
+- DB: PostgreSQL/RDS
+- 관리자 계정 관리: 실제 백엔드 또는 별도 관리자 API
 
-## Deploy on Vercel
+## 다음 연결 포인트
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/message`, `/session/start`, `/session/end`, `/session/history` 실백엔드 연결
+- 관리자 API를 실제 DB 기반으로 교체
+- 대화 기록 상세 보기와 세션 요약 고도화
