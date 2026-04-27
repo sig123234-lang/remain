@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Logo } from "@/components/logo";
+import { ElderAppShell } from "@/components/elder-app-shell";
 import { getHistory } from "@/lib/api";
 import { getStoredAuth } from "@/lib/auth";
 import type { HistorySession, StoredAuth } from "@/lib/types";
@@ -26,42 +26,58 @@ export default function HistoryPage() {
   }, [auth, router]);
 
   return (
-    <main className="app-shell flex min-h-screen justify-center px-5 py-8">
-      <div className="v1-mobile-frame v1-screen flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col px-5 py-6">
-        <header className="mb-6 flex items-center justify-between">
-          <Link className="text-[15px] text-[#378ADD]" href="/home">
-            ← 뒤로
-          </Link>
-          <Logo size="sm" />
-          <div className="w-12" />
-        </header>
+    <ElderAppShell>
+      <div className="space-y-4 px-4 py-4">
+        <div className="remain-card rounded-3xl p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="font-serif text-xl font-semibold text-[var(--remain-primary)]">
+                생애 기록
+              </h1>
+              <p className="mt-1 text-sm text-[var(--remain-muted)]">
+                {auth ? `${auth.name} 님과 나눈 소중한 이야기입니다.` : ""}
+              </p>
+            </div>
+            <Link className="text-xs text-[var(--remain-muted)] underline underline-offset-2" href="/conversation">
+              새 대화
+            </Link>
+          </div>
+        </div>
 
-        <h1 className="mb-4 px-1 text-2xl font-bold text-[#EEEDFE]">대화 기록</h1>
-
-        <div className="flex-1 space-y-3 overflow-y-auto px-1 pb-4">
+        <div className="space-y-3 pb-4">
           {loading ? (
-            <div className="v1-card px-5 py-6 text-sm text-[#667085]">기록을 불러오는 중이에요.</div>
+            <div className="remain-card rounded-3xl px-5 py-6 text-sm text-[var(--remain-muted)]">
+              기록을 불러오는 중이에요.
+            </div>
           ) : sessions.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-2 pb-16 text-center">
+            <div className="remain-card flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-3xl p-8 text-center">
               <p className="text-5xl">📭</p>
-              <p className="text-base font-semibold text-[#EEEDFE]">아직 대화 기록이 없어요</p>
-              <p className="text-sm text-[#444A59]">첫 번째 이야기를 시작해보세요</p>
+              <p className="text-base font-semibold text-[var(--remain-text)]">아직 대화 기록이 없어요</p>
+              <p className="text-sm text-[var(--remain-muted)]">첫 번째 이야기를 시작해보세요</p>
             </div>
           ) : (
             sessions.map((session) => (
-              <article key={session.id} className="v1-card px-4 py-4">
-                <p className="text-[13px] font-semibold text-[#378ADD]">
+              <article key={session.id} className="remain-card rounded-3xl p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="rounded-full bg-[var(--remain-primary-soft)] px-3 py-1 text-[11px] font-medium text-[var(--remain-primary)]">
+                    {session.messageCount}회 대화
+                  </span>
+                  <span className="text-xs text-[var(--remain-muted)]">
+                    {new Date(session.startedAt).toLocaleDateString("ko-KR")}
+                  </span>
+                </div>
+                <p className="text-[13px] font-semibold text-[var(--remain-primary)]">
                   {new Date(session.startedAt).toLocaleDateString("ko-KR")}
                 </p>
                 {session.summary ? (
-                  <p className="mt-2 text-[15px] leading-7 text-[#EEEDFE]">{session.summary}</p>
+                  <p className="mt-2 text-[15px] leading-7 text-[var(--remain-text)]">{session.summary}</p>
                 ) : null}
-                <p className="mt-2 text-xs text-[#444A59]">{session.messageCount}개의 대화</p>
+                <p className="mt-3 text-xs text-[var(--remain-muted)]">대화를 다시 돌아볼 수 있어요</p>
               </article>
             ))
           )}
         </div>
       </div>
-    </main>
+    </ElderAppShell>
   );
 }

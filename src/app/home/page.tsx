@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Logo } from "@/components/logo";
+import { ElderAppShell } from "@/components/elder-app-shell";
 import { getSessionStats } from "@/lib/api";
-import { clearAuth, getStoredAuth } from "@/lib/auth";
+import { getStoredAuth } from "@/lib/auth";
 import type { SessionStats, StoredAuth } from "@/lib/types";
 
 function greetingByHour() {
@@ -43,78 +43,82 @@ export default function HomePage() {
       });
   }, [auth, router]);
 
-  function handleLogout() {
-    clearAuth();
-    router.replace("/login");
-  }
-
   return (
-    <main className="app-shell flex min-h-screen justify-center px-5 py-8">
-      <div className="v1-mobile-frame v1-screen flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col px-7 py-5">
-        <header className="mb-9 flex items-center justify-between">
-          <Logo />
-          <button className="text-[13px] text-[#33384A]" onClick={handleLogout} type="button">
-            로그아웃
-          </button>
-        </header>
-
-        <section className="mb-3">
-          <h1 className="mb-1 text-[22px] font-bold text-[#EEEDFE]">
-            {auth?.name || "회원"}님,
-          </h1>
-          <p className="whitespace-pre-line text-sm leading-6 text-[#555A6B]">
-            {stats.totalSessions === 0
-              ? "첫 번째 이야기를 시작해볼까요?"
-              : `${greetingByHour()}\n지난 ${stats.totalSessions}번의 대화를 모두 기억하고 있어요.`}
+    <ElderAppShell>
+      <div className="space-y-5 px-5 py-5">
+        <section className="remain-gradient-card rounded-[28px] p-6 shadow-[0_18px_50px_rgba(31,45,74,0.18)]">
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <p className="mb-1 text-sm text-white/70">{greetingByHour()}</p>
+              <h1 className="font-serif text-xl font-semibold">{auth?.name || "어르신"} 님</h1>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15">
+              ❤
+            </div>
+          </div>
+          <p className="text-sm leading-7 text-white/80">
+            오늘도 소중한 이야기를 나눠 주세요.
+            <br />
+            AI 이야기 도우미가 함께합니다.
           </p>
         </section>
 
-        <section className="relative flex flex-1 items-center justify-center">
-          <span className="v1-orb-ring" />
-          <span className="v1-orb-ring delay" />
+        <section className="grid grid-cols-2 gap-3">
+          <Link className="remain-card rounded-3xl p-5" href="/conversation">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--remain-primary-soft)] text-[var(--remain-primary)]">
+              🎙
+            </div>
+            <p className="text-sm font-semibold text-[var(--remain-text)]">대화 시작</p>
+            <p className="mt-1 text-xs text-[var(--remain-muted)]">AI와 이야기하기</p>
+          </Link>
 
-          <Link
-            className="v1-pulse relative z-10 flex h-[220px] w-[220px] flex-col items-center justify-center rounded-full border-[1.5px] border-[#185FA5] bg-[#0D1929] text-center"
-            href="/conversation"
-          >
-            <span className="text-[46px]">🎙</span>
-            <span className="mt-2 text-[22px] font-bold text-[#EEEDFE]">대화 시작</span>
-            <span className="mt-1 flex items-baseline text-[13px] text-[#555A6B]">
-              <span className="text-[#EEEDFE]/60">rem</span>
-              <span className="font-bold text-[#378ADD]">AI</span>
-              <span className="text-[#EEEDFE]/60">n</span>
-              <span>&nbsp;와 30분</span>
-            </span>
+          <Link className="remain-card rounded-3xl p-5" href="/history">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(182,134,11,0.12)] text-[var(--remain-gold)]">
+              📖
+            </div>
+            <p className="text-sm font-semibold text-[var(--remain-text)]">생애 기록</p>
+            <p className="mt-1 text-xs text-[var(--remain-muted)]">지난 이야기 보기</p>
           </Link>
         </section>
 
-        <section className="space-y-4 pb-2">
-          {stats.totalSessions > 0 ? (
-            <div className="v1-card flex items-center justify-center px-6 py-4">
-              <div className="flex-1 text-center">
-                <p className="text-[18px] font-bold text-[#378ADD]">{stats.totalSessions}</p>
-                <p className="mt-1 text-xs text-[#444A59]">총 대화</p>
-              </div>
-              <div className="h-8 w-px bg-[#1e1e2e]" />
-              <div className="flex-1 text-center">
-                <p className="text-sm font-semibold text-[#EEEDFE]">
-                  {stats.lastSessionDate
-                    ? new Date(stats.lastSessionDate).toLocaleDateString("ko-KR")
-                    : "-"}
-                </p>
-                <p className="mt-1 text-xs text-[#444A59]">마지막 대화</p>
-              </div>
+        <section className="remain-card rounded-3xl p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-sm text-[var(--remain-gold)]">✦</span>
+            <span className="text-sm font-semibold text-[var(--remain-text)]">오늘의 안내</span>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs text-[var(--remain-muted)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--remain-primary)]" />
+              한 번에 한 가지 이야기씩 천천히 말씀해 주세요
             </div>
-          ) : null}
+            <div className="flex items-center gap-2 text-xs text-[var(--remain-muted)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--remain-primary)]" />
+              마이크를 눌러 음성으로 대화할 수 있어요
+            </div>
+            <div className="flex items-center gap-2 text-xs text-[var(--remain-muted)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--remain-primary)]" />
+              지난 {stats.totalSessions}번의 대화 기록을 기억하고 있어요
+            </div>
+          </div>
+        </section>
 
-          <Link
-            className="v1-card flex items-center justify-center rounded-[14px] px-4 py-4 text-sm text-[#555A6B]"
-            href="/history"
-          >
-            📖&nbsp;&nbsp;대화 기록 보기
-          </Link>
+        <section className="remain-card rounded-3xl p-5">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-[var(--remain-surface-muted)] px-4 py-3 text-center">
+              <p className="text-2xl font-bold text-[var(--remain-primary)]">{stats.totalSessions}</p>
+              <p className="mt-1 text-[11px] text-[var(--remain-muted)]">총 대화</p>
+            </div>
+            <div className="rounded-2xl bg-[var(--remain-surface-muted)] px-4 py-3 text-center">
+              <p className="text-sm font-semibold text-[var(--remain-text)]">
+                {stats.lastSessionDate
+                  ? new Date(stats.lastSessionDate).toLocaleDateString("ko-KR")
+                  : "아직 없어요"}
+              </p>
+              <p className="mt-1 text-[11px] text-[var(--remain-muted)]">마지막 대화</p>
+            </div>
+          </div>
         </section>
       </div>
-    </main>
+    </ElderAppShell>
   );
 }

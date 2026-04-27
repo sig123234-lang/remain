@@ -1,4 +1,5 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -11,6 +12,18 @@
   --muted: #94a3b8;
   --accent: #378add;
   --accent-strong: #4ea6ff;
+  --remain-bg: oklch(0.97 0.012 80);
+  --remain-bg-2: oklch(0.94 0.018 75);
+  --remain-primary: oklch(0.22 0.08 255);
+  --remain-primary-2: oklch(0.28 0.1 260);
+  --remain-gold: oklch(0.55 0.14 75);
+  --remain-surface: #ffffff;
+  --remain-surface-muted: rgba(37, 51, 84, 0.06);
+  --remain-border: rgba(23, 31, 55, 0.08);
+  --remain-text: oklch(0.18 0.02 250);
+  --remain-muted: oklch(0.52 0.02 250);
+  --remain-muted-2: oklch(0.6 0.02 250);
+  --remain-primary-soft: rgba(31, 45, 74, 0.08);
 }
 
 @theme inline {
@@ -34,6 +47,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Pretendard", system-ui, sans-serif;
+  overflow: hidden;
 }
 
 a {
@@ -49,58 +63,104 @@ textarea {
 
 .app-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(55, 138, 221, 0.18), transparent 32%),
-    linear-gradient(180deg, rgba(8, 10, 15, 0.98), rgba(6, 8, 12, 0.98));
+  background: linear-gradient(160deg, var(--remain-bg) 0%, var(--remain-bg-2) 100%);
 }
 
-.v1-mobile-frame {
-  position: relative;
+.remain-mobile-shell {
+  display: flex;
+  height: calc(100vh - 3rem);
+  width: 100%;
+  max-width: 430px;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--remain-bg) 0%, var(--remain-bg-2) 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 22px 70px rgba(0, 0, 0, 0.12);
 }
 
-.v1-screen {
-  background: #0d0d14;
+.remain-page {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
-.v1-primary-button {
-  border-radius: 16px;
-  background: #185fa5;
-  padding: 1.05rem 1.25rem;
-  color: #fff;
-  font-size: 1.05rem;
-  font-weight: 700;
+.remain-app-header {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--remain-border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
 }
 
-.v1-card {
-  border: 0.5px solid #1e1e2e;
-  background: #111118;
-  border-radius: 16px;
+.remain-bottom-nav {
+  flex-shrink: 0;
+  border-top: 1px solid var(--remain-border);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.v1-logo-row {
+.remain-gradient-card {
+  background: linear-gradient(
+    135deg,
+    var(--remain-primary) 0%,
+    var(--remain-primary-2) 55%,
+    oklch(0.2 0.06 250) 100%
+  );
+  color: white;
+}
+
+.remain-card {
+  border: 1px solid var(--remain-border);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 12px 30px rgba(0, 0, 0, 0.04);
+}
+
+.remain-chip {
+  border: 1px solid rgba(20, 30, 50, 0.08);
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--remain-muted);
+}
+
+.remain-primary-button {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  padding: 0.95rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--remain-primary) 0%, var(--remain-primary-2) 100%);
+  box-shadow: 0 12px 26px rgba(31, 45, 74, 0.22);
 }
 
-.v1-orb-ring {
-  position: absolute;
-  inset: 50%;
-  border: 1px solid #185fa5;
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  animation: ring-spread 2.2s ease-out infinite;
+.remain-outline-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--remain-border);
+  padding: 0.95rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--remain-text);
+  background: rgba(255, 255, 255, 0.75);
 }
 
-.v1-orb-ring.delay {
-  animation-delay: 1.1s;
-}
-
-.v1-pulse {
-  animation: pulse-soft 2.8s ease-in-out infinite;
-}
-
-.v1-wave {
-  animation: orb-wave 1.4s ease-in-out infinite;
+.remain-warm-panel {
+  background: linear-gradient(
+    160deg,
+    rgba(249, 245, 239, 0.98) 0%,
+    rgba(237, 232, 223, 0.92) 55%,
+    rgba(238, 240, 247, 0.92) 100%
+  );
 }
 
 .panel {
@@ -194,29 +254,6 @@ textarea {
   50% {
     opacity: 1;
     transform: translateY(-2px);
-  }
-}
-
-@keyframes pulse-soft {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.04);
-  }
-}
-
-@keyframes ring-spread {
-  0% {
-    width: 220px;
-    height: 220px;
-    opacity: 0.5;
-  }
-  100% {
-    width: 330px;
-    height: 330px;
-    opacity: 0;
   }
 }
 

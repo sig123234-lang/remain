@@ -6,23 +6,7 @@ import { useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { getStoredAuth } from "@/lib/auth";
 
-const features = [
-  {
-    icon: "🎙",
-    title: "음성으로 대화",
-    description: "말씀만 하세요. 받아쓰기는 AI가 도와드릴게요.",
-  },
-  {
-    icon: "🧠",
-    title: "AI가 모두 기억",
-    description: "지난 이야기를 이어서 천천히 대화를 나눕니다.",
-  },
-  {
-    icon: "📖",
-    title: "기록으로 남습니다",
-    description: "나눈 이야기는 다시 돌아볼 수 있도록 남겨집니다.",
-  },
-];
+const chips = ["AI 음성 대화", "생애 기록 보관", "회상치료 전문"];
 
 export default function Page() {
   const router = useRouter();
@@ -52,44 +36,44 @@ export default function Page() {
   }
 
   return (
-    <main className="app-shell flex min-h-screen justify-center px-5 py-8">
-      <div className="v1-mobile-frame v1-screen flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-between px-7 py-10">
-        <section className="flex flex-col items-center gap-5 pt-6 text-center">
-          <Logo size="lg" />
-          <p className="max-w-xs text-sm leading-6 text-[#667085]">
-            당신의 이야기를 영원히 기억합니다
-          </p>
-        </section>
+    <main className="app-shell flex min-h-screen justify-center px-4 py-6">
+      <div className="remain-mobile-shell">
+        <div className="remain-page flex flex-col items-center justify-center px-6 py-8 text-center">
+          <div className="mb-9">
+            <Logo size="lg" />
+            <p className="mt-3 text-sm uppercase tracking-[0.22em] text-[var(--remain-muted)]">
+              회상치료 AI 인터뷰
+            </p>
+          </div>
 
-        <section className="space-y-4">
-          {features.map((feature) => (
-            <article
-              key={feature.title}
-              className="rounded-[18px] border border-[#1e1e2e] bg-[#111118] px-4 py-4"
-            >
-              <div className="flex items-center gap-4">
-                <span className="text-2xl">{feature.icon}</span>
-                <div className="space-y-1">
-                  <h2 className="text-left text-[15px] font-semibold text-[#EEEDFE]">
-                    {feature.title}
-                  </h2>
-                  <p className="text-left text-[13px] leading-5 text-[#555A6B]">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </section>
+          <div className="mb-8 max-w-xs space-y-3">
+            <h1 className="font-serif text-[32px] font-semibold leading-tight text-[var(--remain-primary)]">
+              어르신의 이야기를
+              <br />
+              소중히 기록합니다
+            </h1>
+            <p className="text-sm leading-7 text-[var(--remain-muted)]">
+              AI가 따뜻한 대화 상대가 되어 생애 이야기를 듣고 기록합니다
+            </p>
+          </div>
 
-        <section className="space-y-4 pb-2">
-          <Link className="v1-primary-button flex w-full justify-center" href="/login">
-            시작하기
-          </Link>
-          <p className="text-center text-xs leading-5 text-[#444A59]">
-            어르신 계정은 관리자 화면에서 만들어드릴 수 있어요.
-          </p>
-        </section>
+          <div className="w-full max-w-xs space-y-3">
+            <Link className="remain-primary-button flex w-full justify-center" href="/login">
+              시작하기 →
+            </Link>
+            <p className="rounded-2xl border border-[var(--remain-border)] bg-white/65 px-4 py-3 text-xs leading-5 text-[var(--remain-muted)]">
+              어르신 계정은 관리자 화면에서 미리 만들어드릴 수 있어요
+            </p>
+          </div>
+
+          <div className="mt-7 flex flex-wrap justify-center gap-2">
+            {chips.map((chip) => (
+              <span key={chip} className="remain-chip rounded-full px-3 py-1.5 text-xs">
+                {chip}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </main>
   );
