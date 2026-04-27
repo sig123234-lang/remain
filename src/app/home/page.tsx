@@ -49,71 +49,70 @@ export default function HomePage() {
   }
 
   return (
-    <main className="app-shell min-h-screen px-5 py-6 sm:px-8">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6">
-        <header className="flex items-center justify-between">
+    <main className="app-shell flex min-h-screen justify-center px-5 py-8">
+      <div className="v1-mobile-frame v1-screen flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col px-7 py-5">
+        <header className="mb-9 flex items-center justify-between">
           <Logo />
-          <button className="secondary-button" onClick={handleLogout} type="button">
+          <button className="text-[13px] text-[#33384A]" onClick={handleLogout} type="button">
             로그아웃
           </button>
         </header>
 
-        <section className="panel-strong rounded-[36px] px-6 py-8 sm:px-10 sm:py-12">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div className="space-y-5">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#7dbbff]">
-                reminiscence therapy companion
-              </p>
-              <div className="space-y-3">
-                <h1 className="text-4xl font-black tracking-[-0.05em] text-white sm:text-5xl">
-                  {greetingByHour()}
-                </h1>
-                <p className="max-w-xl text-base leading-8 text-[#c0d0e7] sm:text-lg">
-                  {auth ? `${auth.name} 어르신, ` : ""}
-                  오늘도 편안하게 이야기를 이어가볼게요. remAIn은 지난 대화의 흐름을
-                  기억하면서 천천히 대화를 이어갑니다.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Link className="primary-button" href="/conversation">
-                  대화 시작하기
-                </Link>
-                <Link className="secondary-button" href="/history">
-                  이전 대화 보기
-                </Link>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center">
-              <div className="relative flex h-56 w-56 items-center justify-center rounded-full border border-[#185FA5] bg-[#0D1929] shadow-[0_0_0_20px_rgba(55,138,221,0.08),0_0_80px_rgba(24,95,165,0.28)]">
-                <div className="absolute inset-4 rounded-full border border-[#378ADD]/40" />
-                <span className="text-7xl">🤖</span>
-              </div>
-            </div>
-          </div>
+        <section className="mb-3">
+          <h1 className="mb-1 text-[22px] font-bold text-[#EEEDFE]">
+            {auth?.name || "회원"}님,
+          </h1>
+          <p className="whitespace-pre-line text-sm leading-6 text-[#555A6B]">
+            {stats.totalSessions === 0
+              ? "첫 번째 이야기를 시작해볼까요?"
+              : `${greetingByHour()}\n지난 ${stats.totalSessions}번의 대화를 모두 기억하고 있어요.`}
+          </p>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <article className="panel rounded-[28px] p-6">
-            <p className="text-sm text-[#94A3B8]">총 대화 횟수</p>
-            <p className="mt-3 text-3xl font-bold text-white">{stats.totalSessions}</p>
-          </article>
-          <article className="panel rounded-[28px] p-6">
-            <p className="text-sm text-[#94A3B8]">마지막 대화</p>
-            <p className="mt-3 text-lg font-semibold text-white">
-              {stats.lastSessionDate
-                ? new Date(stats.lastSessionDate).toLocaleDateString("ko-KR")
-                : "아직 없어요"}
-            </p>
-          </article>
-          <article className="panel rounded-[28px] p-6">
-            <p className="text-sm text-[#94A3B8]">대화 안내</p>
-            <p className="mt-3 text-sm leading-7 text-[#d8e3f3]">
-              한 번에 한 가지 이야기씩 천천히 말씀해 주세요. 음성 입력도 함께 쓸 수
-              있어요.
-            </p>
-          </article>
+        <section className="relative flex flex-1 items-center justify-center">
+          <span className="v1-orb-ring" />
+          <span className="v1-orb-ring delay" />
+
+          <Link
+            className="v1-pulse relative z-10 flex h-[220px] w-[220px] flex-col items-center justify-center rounded-full border-[1.5px] border-[#185FA5] bg-[#0D1929] text-center"
+            href="/conversation"
+          >
+            <span className="text-[46px]">🎙</span>
+            <span className="mt-2 text-[22px] font-bold text-[#EEEDFE]">대화 시작</span>
+            <span className="mt-1 flex items-baseline text-[13px] text-[#555A6B]">
+              <span className="text-[#EEEDFE]/60">rem</span>
+              <span className="font-bold text-[#378ADD]">AI</span>
+              <span className="text-[#EEEDFE]/60">n</span>
+              <span>&nbsp;와 30분</span>
+            </span>
+          </Link>
+        </section>
+
+        <section className="space-y-4 pb-2">
+          {stats.totalSessions > 0 ? (
+            <div className="v1-card flex items-center justify-center px-6 py-4">
+              <div className="flex-1 text-center">
+                <p className="text-[18px] font-bold text-[#378ADD]">{stats.totalSessions}</p>
+                <p className="mt-1 text-xs text-[#444A59]">총 대화</p>
+              </div>
+              <div className="h-8 w-px bg-[#1e1e2e]" />
+              <div className="flex-1 text-center">
+                <p className="text-sm font-semibold text-[#EEEDFE]">
+                  {stats.lastSessionDate
+                    ? new Date(stats.lastSessionDate).toLocaleDateString("ko-KR")
+                    : "-"}
+                </p>
+                <p className="mt-1 text-xs text-[#444A59]">마지막 대화</p>
+              </div>
+            </div>
+          ) : null}
+
+          <Link
+            className="v1-card flex items-center justify-center rounded-[14px] px-4 py-4 text-sm text-[#555A6B]"
+            href="/history"
+          >
+            📖&nbsp;&nbsp;대화 기록 보기
+          </Link>
         </section>
       </div>
     </main>
