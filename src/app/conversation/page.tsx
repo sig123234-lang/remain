@@ -1,19 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ElderAppShell } from "@/components/elder-app-shell";
 import { endSession, sendMessage, startSession } from "@/lib/api";
 import { getStoredAuth } from "@/lib/auth";
-import {
-  FONT_SIZE_STYLE,
-  getPreferences,
-  TTS_RATE,
-  type RecordingDuration,
-} from "@/lib/preferences";
+import { FONT_SIZE_STYLE, getPreferences, TTS_RATE } from "@/lib/preferences";
 import type { ChatMessage, StoredAuth } from "@/lib/types";
-
-const SESSION_DURATION = 30 * 60;
 
 type Phase = "idle" | "connecting" | "listening" | "processing" | "thinking" | "speaking";
 
@@ -83,31 +76,20 @@ function phaseIcon(phase: Phase) {
   }
 }
 
-function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
-}
-
 export default function ConversationPage() {
   const router = useRouter();
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const sessionTimerRef = useRef<number | null>(null);
-  const recordingTimerRef = useRef<number | null>(null);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
   const activeRef = useRef(true);
-  const pendingTranscriptRef = useRef("");
+  const manualStopRef = useRef(false);
+  const transcriptRef = useRef("");
   const [auth] = useState<StoredAuth | null>(() => getStoredAuth());
   const [sessionId, setSessionId] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [phase, setPhase] = useState<Phase>(() => (auth ? "connecting" : "idle"));
-  const [timeLeft, setTimeLeft] = useState(SESSION_DURATION);
-  const [recordingCountdown, setRecordingCountdown] = useState<RecordingDuration>(12);
   const [preferences, setPreferences] = useState(() => getPreferences());
-  const [input, setInput] = useState("");
   const [error, setError] = useState("");
-  const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState("");
   const [speechSupported] = useState(() => {
     if (typeof window === "undefined") {
       return false;
@@ -126,66 +108,46 @@ export default function ConversationPage() {
     return () => window.removeEventListener("storage", syncPreferences);
   }, []);
 
-  const countdownRatio = useMemo(
-    () => (recordingCountdown / preferences.recordingDuration) * 100,
-    [preferences.recordingDuration, recordingCountdown],
-  );
-
-  const clearRecordingTimer = useCallback(() => {
-    if (recordingTimerRef.current) {
-      window.clearInterval(recordingTimerRef.current);
-      recordingTimerRef.current = null;
-    }
-  }, []);
-
   const cleanup = useCallback(() => {
     activeRef.current = false;
-    clearRecordingTimer();
-    if (sessionTimerRef.current) {
-      window.clearInterval(sessionTimerRef.current);
-      sessionTimerRef.current = null;
-    }
     recognitionRef.current?.stop();
     window.speechSynthesis?.cancel();
-  }, [clearRecordingTimer]);
+  }, []);
 
   const startListening = useCallback(() => {
-    setVoiceModeEnabled(true);
-    clearRecordingTimer();
-    pendingTranscriptRef.current = "";
-    setRecordingCountdown(preferences.recordingDuration);
-    setPhase("listening");
-    setError("");
-
-    if (!speechSupported || !recognitionRef.current) {
+    if (!speechSupported || !recognitionRef.current || pending) {
       return;
     }
 
-    recognitionRef.current.start();
+    manualStopRef.current = false;
+    transcriptRef.current = "";
+    setLiveTranscript("");
+    setError("");
+    setPhase("listening");
+    try {
+      recognitionRef.current.start();
+    } catch {
+      setPhase("idle");
+      setError("마이크를 시작하지 못했어요. 다시 한 번 눌러주세요.");
+    }
+  }, [pending, speechSupported]);
 
-    let count = preferences.recordingDuration;
-    recordingTimerRef.current = window.setInterval(() => {
-      count -= 1;
-      setRecordingCountdown(count as RecordingDuration);
-      if (count <= 0) {
-        clearRecordingTimer();
-        recognitionRef.current?.stop();
-        setPhase("processing");
-      }
-    }, 1000);
-  }, [clearRecordingTimer, preferences.recordingDuration, speechSupported]);
+  const stopListening = useCallback(() => {
+    if (!recognitionRef.current) {
+      return;
+    }
+
+    manualStopRef.current = true;
+    recognitionRef.current.stop();
+    setPhase("processing");
+  }, []);
 
   const speakText = useCallback(
     async (text: string) => {
-      if (!voiceModeEnabled) {
-        setPhase("idle");
-        return;
-      }
-
       setPhase("speaking");
 
       if (typeof window === "undefined" || !window.speechSynthesis) {
-        startListening();
+        setPhase("idle");
         return;
       }
 
@@ -193,7 +155,6 @@ export default function ConversationPage() {
 
       await new Promise<void>((resolve) => {
         const utterance = new SpeechSynthesisUtterance(text);
-        synthRef.current = utterance;
         utterance.lang = "ko-KR";
         utterance.pitch = 0.92;
         utterance.rate = TTS_RATE[preferences.ttsSpeed];
@@ -203,10 +164,10 @@ export default function ConversationPage() {
       });
 
       if (activeRef.current) {
-        startListening();
+        setPhase("idle");
       }
     },
-    [preferences.ttsSpeed, startListening, voiceModeEnabled],
+    [preferences.ttsSpeed],
   );
 
   const runTurn = useCallback(
@@ -227,6 +188,8 @@ export default function ConversationPage() {
         const response = await sendMessage(auth.userId, sessionId, userText, auth.token);
         const reply = response.reply || welcomeMessage(auth.name);
         setMessages((prev) => [...prev, createMessage("assistant", reply)]);
+        transcriptRef.current = "";
+        setLiveTranscript("");
         setPending(false);
         await speakText(reply);
       } catch {
@@ -266,22 +229,6 @@ export default function ConversationPage() {
     [auth, cleanup, router, sessionId],
   );
 
-  const handleSendText = useCallback(
-    async (textOverride?: string) => {
-      const text = (textOverride ?? input).trim();
-      if (!text || pending) {
-        return;
-      }
-
-      clearRecordingTimer();
-      recognitionRef.current?.stop();
-      setInput("");
-      setPhase("processing");
-      await runTurn(text);
-    },
-    [clearRecordingTimer, input, pending, runTurn],
-  );
-
   useEffect(() => {
     if (!auth) {
       router.replace("/login");
@@ -291,15 +238,6 @@ export default function ConversationPage() {
     startSession(auth.userId, auth.token)
       .then(async ({ sessionId: nextSessionId }) => {
         setSessionId(nextSessionId);
-        sessionTimerRef.current = window.setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 1) {
-              void handleEndSession(true);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
 
         try {
           const response = await sendMessage(
@@ -310,11 +248,11 @@ export default function ConversationPage() {
           );
           const reply = response.reply || welcomeMessage(auth.name);
           setMessages([createMessage("assistant", reply)]);
-          setPhase("idle");
+          await speakText(reply);
         } catch {
           const reply = welcomeMessage(auth.name);
           setMessages([createMessage("assistant", reply)]);
-          setPhase("idle");
+          await speakText(reply);
         }
       })
       .catch(() => {
@@ -323,7 +261,7 @@ export default function ConversationPage() {
       });
 
     return () => cleanup();
-  }, [auth, cleanup, handleEndSession, router, speakText]);
+  }, [auth, cleanup, router, speakText]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -337,40 +275,54 @@ export default function ConversationPage() {
 
     const recognition = new Recognition();
     recognition.lang = "ko-KR";
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true;
+    recognition.interimResults = true;
     recognition.onresult = (event) => {
-      pendingTranscriptRef.current = event.results[0]?.[0]?.transcript ?? "";
+      let finalTranscript = "";
+      let interimTranscript = "";
+
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const transcript = result[0]?.transcript ?? "";
+
+        if (result.isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      transcriptRef.current = `${finalTranscript}${interimTranscript}`.trim();
+      setLiveTranscript(transcriptRef.current);
     };
     recognition.onend = () => {
-      if (pendingTranscriptRef.current.trim()) {
-        void handleSendText(pendingTranscriptRef.current);
-        pendingTranscriptRef.current = "";
+      if (manualStopRef.current) {
+        const transcript = transcriptRef.current.trim();
+        manualStopRef.current = false;
+
+        if (transcript) {
+          void runTurn(transcript);
+          return;
+        }
+
+        setPhase("idle");
         return;
       }
+
       setPhase("idle");
     };
     recognition.onerror = () => {
       setPhase("idle");
-      setError("음성 인식을 사용할 수 없어요.");
+      setError("이 브라우저에서는 음성 인식이 잘 동작하지 않아요.");
     };
 
     recognitionRef.current = recognition;
 
     return () => recognition.stop();
-  }, [handleSendText]);
+  }, [runTurn]);
 
   const rightSlot = (
     <div className="flex items-center gap-2">
-      <span
-        className="font-mono text-sm font-semibold tabular-nums"
-        style={{
-          color:
-            timeLeft < 5 * 60 ? "#d05b5b" : timeLeft < 10 * 60 ? "#d48d1c" : "#1f9d63",
-        }}
-      >
-        {formatTime(timeLeft)}
-      </span>
       <button
         className="rounded-xl bg-[#fff4f4] px-3 py-1.5 text-xs text-[#c64545] transition hover:bg-[#ffeaea]"
         onClick={() => void handleEndSession()}
@@ -450,34 +402,45 @@ export default function ConversationPage() {
         <div className="space-y-3">
           <div className="remain-card rounded-3xl p-4">
             <div className="flex items-center justify-center">
-              <div
-                className={`flex h-20 w-20 items-center justify-center rounded-full border-2 text-[30px] ${
+              <button
+                className={`flex h-28 w-28 items-center justify-center rounded-full border-2 text-[42px] transition ${
                   phase === "listening" ? "wave-ring" : ""
                 }`}
+                disabled={!speechSupported || pending || phase === "speaking" || phase === "thinking"}
+                onClick={() => {
+                  if (phase === "listening") {
+                    stopListening();
+                    return;
+                  }
+
+                  startListening();
+                }}
                 style={{ borderColor: phaseColor(phase), color: phaseColor(phase) }}
+                type="button"
               >
-                {phaseIcon(phase)}
-              </div>
+                {phase === "listening" ? "■" : phaseIcon(phase)}
+              </button>
             </div>
 
             <p className="mt-4 text-center text-sm font-semibold" style={{ color: phaseColor(phase) }}>
               {phaseLabel(phase)}
             </p>
 
-            {phase === "listening" ? (
-              <div className="mt-4">
-                <div className="h-2 overflow-hidden rounded-full bg-[var(--remain-surface-muted)]">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{
-                      width: `${countdownRatio}%`,
-                      backgroundColor: recordingCountdown <= 3 ? "#d05b5b" : "#1f9d63",
-                    }}
-                  />
-                </div>
-                <p className="mt-2 text-center text-xs text-[var(--remain-muted)]">
-                  {recordingCountdown}초 남았어요
+            {speechSupported ? (
+              <div className="mt-4 rounded-2xl bg-[var(--remain-surface-muted)] px-4 py-4 text-center">
+                <p className="text-xs text-[var(--remain-muted)]">
+                  {phase === "listening"
+                    ? "말씀을 마치시면 다시 버튼을 눌러 보내주세요."
+                    : "가운데 마이크를 누르면 듣기 시작해요."}
                 </p>
+                {liveTranscript ? (
+                  <p
+                    className="mt-3 whitespace-pre-wrap leading-relaxed text-[var(--remain-text)]"
+                    style={{ fontSize: FONT_SIZE_STYLE[preferences.fontSize] }}
+                  >
+                    {liveTranscript}
+                  </p>
+                ) : null}
               </div>
             ) : null}
 
@@ -486,60 +449,11 @@ export default function ConversationPage() {
                 {error}
               </div>
             ) : null}
-          </div>
 
-          <div className="remain-card rounded-3xl p-3">
-            <textarea
-              className="min-h-[88px] w-full resize-none bg-transparent text-[15px] leading-6 text-[var(--remain-text)] outline-none placeholder:text-[var(--remain-muted-2)]"
-              placeholder="직접 입력하고 싶으시면 여기에 적어주세요"
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  void handleSendText();
-                }
-              }}
-            />
-
-            <div className="mt-3 flex items-center gap-3">
-              <button
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border ${
-                  phase === "listening"
-                    ? "border-[#d05b5b] bg-[#fff1f1] text-[#d05b5b]"
-                    : "border-[var(--remain-border)] bg-[var(--remain-primary-soft)] text-[var(--remain-primary)]"
-                }`}
-                disabled={!speechSupported || pending}
-                onClick={() => {
-                  if (phase === "listening") {
-                    clearRecordingTimer();
-                    recognitionRef.current?.stop();
-                    setPhase("processing");
-                    return;
-                  }
-                  startListening();
-                }}
-                type="button"
-              >
-                {phase === "listening" ? "■" : "🎤"}
-              </button>
-
-              <button
-                className="remain-primary-button flex-1 justify-center"
-                disabled={!input.trim() || pending}
-                onClick={() => void handleSendText()}
-                type="button"
-              >
-                보내기
-              </button>
-            </div>
-
-            <p className="mt-3 text-xs text-[var(--remain-muted)]">
+            <p className="mt-4 text-center text-xs text-[var(--remain-muted)]">
               {speechSupported
-                ? voiceModeEnabled
-                  ? "말씀하시면 대화를 듣고, 답하고, 다시 다음 이야기를 기다릴게요."
-                  : "처음에는 조용히 시작해요. 마이크를 누르면 음성 대화가 시작됩니다."
-                : "이 브라우저에서는 음성 인식이 지원되지 않아 입력으로만 대화를 이어갈 수 있어요."}
+                ? "처음 인사는 제가 먼저 읽어드릴게요."
+                : "이 브라우저에서는 음성 인식이 지원되지 않을 수 있어요."}
             </p>
           </div>
         </div>

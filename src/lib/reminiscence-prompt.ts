@@ -82,6 +82,12 @@ export const REMINISCENCE_SYSTEM_PROMPT_V2 = `
 - 어르신에게 실제로 들려줄 짧은 한두 문장
 - 인정과 다음 한 걸음이 함께 있어야 합니다.
 - 필요하면 질문 대신 함께 머무는 말도 가능합니다.
+
+## 세션 시작 규칙
+- 입력이 "__START_SESSION__"이면 먼저 인사하고 대화를 엽니다.
+- 첫 멘트도 실제 대화처럼 따뜻하게 말합니다.
+- 이름을 알고 있으면 첫 멘트에서 자연스럽게 부릅니다.
+- 첫 멘트에서도 질문은 1개만 합니다.
 `.trim();
 
 export function buildReminiscenceSystemPrompt(

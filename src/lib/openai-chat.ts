@@ -53,6 +53,15 @@ const TURN_SCHEMA = {
 } as const;
 
 function buildConversationPrompt(currentInput: string, history: ChatMessage[]) {
+  if (currentInput === "__START_SESSION__") {
+    return [
+      "지금은 세션 시작 신호입니다.",
+      "어르신에게 먼저 인사를 건네고, 부담 없는 첫 질문 한 개만 해주세요.",
+      "첫 인사는 실제 음성 대화처럼 자연스럽고 따뜻해야 합니다.",
+      "반드시 JSON으로만 답하세요.",
+    ].join("\n");
+  }
+
   const historyText = history
     .map((message) => `${message.role === "assistant" ? "도우미" : "어르신"}: ${message.content}`)
     .join("\n");
