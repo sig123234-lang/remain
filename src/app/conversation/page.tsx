@@ -82,6 +82,7 @@ export default function ConversationPage() {
   const activeRef = useRef(true);
   const manualStopRef = useRef(false);
   const transcriptRef = useRef("");
+  const submitLockRef = useRef(false);
   const [auth] = useState<StoredAuth | null>(() => getStoredAuth());
   const [sessionId, setSessionId] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -201,6 +202,28 @@ export default function ConversationPage() {
     [auth, sessionId, speakText],
   );
 
+  const submitTranscript = useCallback(
+    async (transcript: string) => {
+      const text = transcript.trim();
+
+      if (!text || submitLockRef.current) {
+        if (!text) {
+          setPhase("idle");
+        }
+        return;
+      }
+
+      submitLockRef.current = true;
+
+      try {
+        await runTurn(text);
+      } finally {
+        submitLockRef.current = false;
+      }
+    },
+    [runTurn],
+  );
+
   const handleEndSession = useCallback(
     async (forced = false) => {
       if (!auth || !sessionId) {
@@ -301,7 +324,7 @@ export default function ConversationPage() {
         manualStopRef.current = false;
 
         if (transcript) {
-          void runTurn(transcript);
+          void submitTranscript(transcript);
           return;
         }
 
@@ -319,7 +342,30 @@ export default function ConversationPage() {
     recognitionRef.current = recognition;
 
     return () => recognition.stop();
-  }, [runTurn]);
+  }, [submitTranscript]);
+
+  useEffect(() => {
+    if (phase !== "processing" || !manualStopRef.current) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      const transcript = transcriptRef.current.trim();
+
+      if (manualStopRef.current && transcript) {
+        manualStopRef.current = false;
+        void submitTranscript(transcript);
+        return;
+      }
+
+      if (manualStopRef.current) {
+        manualStopRef.current = false;
+        setPhase("idle");
+      }
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [phase, submitTranscript]);
 
   const rightSlot = (
     <div className="flex items-center gap-2">
