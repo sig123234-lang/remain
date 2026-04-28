@@ -107,6 +107,7 @@ export default function ConversationPage() {
   const [preferences, setPreferences] = useState(() => getPreferences());
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
+  const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [speechSupported] = useState(() => {
     if (typeof window === "undefined") {
       return false;
@@ -149,6 +150,7 @@ export default function ConversationPage() {
   }, [clearRecordingTimer]);
 
   const startListening = useCallback(() => {
+    setVoiceModeEnabled(true);
     clearRecordingTimer();
     pendingTranscriptRef.current = "";
     setRecordingCountdown(preferences.recordingDuration);
@@ -175,6 +177,11 @@ export default function ConversationPage() {
 
   const speakText = useCallback(
     async (text: string) => {
+      if (!voiceModeEnabled) {
+        setPhase("idle");
+        return;
+      }
+
       setPhase("speaking");
 
       if (typeof window === "undefined" || !window.speechSynthesis) {
@@ -199,7 +206,7 @@ export default function ConversationPage() {
         startListening();
       }
     },
-    [preferences.ttsSpeed, startListening],
+    [preferences.ttsSpeed, startListening, voiceModeEnabled],
   );
 
   const runTurn = useCallback(
@@ -303,11 +310,11 @@ export default function ConversationPage() {
           );
           const reply = response.reply || welcomeMessage(auth.name);
           setMessages([createMessage("assistant", reply)]);
-          await speakText(reply);
+          setPhase("idle");
         } catch {
           const reply = welcomeMessage(auth.name);
           setMessages([createMessage("assistant", reply)]);
-          await speakText(reply);
+          setPhase("idle");
         }
       })
       .catch(() => {
@@ -529,7 +536,9 @@ export default function ConversationPage() {
 
             <p className="mt-3 text-xs text-[var(--remain-muted)]">
               {speechSupported
-                ? "말씀하시면 대화를 듣고, 답하고, 다시 다음 이야기를 기다릴게요."
+                ? voiceModeEnabled
+                  ? "말씀하시면 대화를 듣고, 답하고, 다시 다음 이야기를 기다릴게요."
+                  : "처음에는 조용히 시작해요. 마이크를 누르면 음성 대화가 시작됩니다."
                 : "이 브라우저에서는 음성 인식이 지원되지 않아 입력으로만 대화를 이어갈 수 있어요."}
             </p>
           </div>

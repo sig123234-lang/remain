@@ -77,3 +77,8 @@ export function authenticateUser(username: string, password: string) {
 
   return toSafeUser(user);
 }
+
+export function findUserById(userId: string) {
+  const user = users.find((entry) => entry.id === userId);
+  return user ? toSafeUser(user) : null;
+}

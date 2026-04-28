@@ -18,8 +18,8 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-개발 중에는 `NEXT_PUBLIC_API_URL`이 없어도 데모 모드로 동작할 수 있습니다.
-운영 배포에서는 기본적으로 데모 모드가 꺼지며, 실제 API 또는 명시적 데모 설정이 필요합니다.
+개발 중에는 `NEXT_PUBLIC_API_URL`이 없어도 프로젝트 내부 API로 동작할 수 있습니다.
+`OPENAI_API_KEY`가 있으면 내부 `/api/message`가 OpenAI를 호출하고, 키가 없고 데모 모드가 허용되면 데모 응답으로 동작합니다.
 
 ## 관리자 페이지
 
@@ -29,7 +29,9 @@ npm run dev
 
 ## Vercel 배포 전 필수
 
-- `NEXT_PUBLIC_API_URL` 설정
+- 내부 API만 쓸 경우 `NEXT_PUBLIC_API_URL`은 비워둘 수 있음
+- `OPENAI_API_KEY` 설정
+- 선택: `OPENAI_MODEL` 설정 (`gpt-4o-mini` 기본)
 - `ADMIN_USERNAME` 설정
 - `ADMIN_PASSWORD` 설정
 - `ADMIN_SESSION_SECRET` 설정
@@ -39,7 +41,8 @@ npm run dev
 ## 권장 배포 방식
 
 - 프론트: Vercel
-- 대화 API: AWS Lambda + API Gateway
+- 초기 버전 대화 API: 현재 프로젝트 내부 Next.js API Route
+- 확장형 대화 API: AWS Lambda + API Gateway 또는 별도 서버
 - DB: PostgreSQL/RDS
 - 관리자 계정 관리: 실제 백엔드 또는 별도 관리자 API
 
@@ -48,3 +51,9 @@ npm run dev
 - `/message`, `/session/start`, `/session/end`, `/session/history` 실백엔드 연결
 - 관리자 API를 실제 DB 기반으로 교체
 - 대화 기록 상세 보기와 세션 요약 고도화
+
+## 회상 인터뷰 프롬프트
+
+- 현재 프로젝트에는 [src/lib/reminiscence-prompt.ts](/Users/kim/Documents/Codex/remain%20v3/src/lib/reminiscence-prompt.ts:1)에 회상치료 인터뷰어 시스템 프롬프트 v2 적응본이 들어 있습니다.
+- 데모 모드 응답은 [src/lib/demo-reminiscence.ts](/Users/kim/Documents/Codex/remain%20v3/src/lib/demo-reminiscence.ts:1)에서 이 프롬프트 원칙을 따라 말투와 질문 방향을 흉내 냅니다.
+- 실제 운영 백엔드를 붙일 때는 `/message` 처리 서버에서 `buildReminiscenceSystemPrompt()`를 system prompt로 넘기면 됩니다.

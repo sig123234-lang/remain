@@ -4,7 +4,7 @@ import type {
   HistorySession,
   SessionStats,
 } from "@/lib/types";
-import { assertApiConfigured, canUseDemoMode, getApiBase } from "@/lib/config";
+import { getApiBase } from "@/lib/config";
 
 const API_BASE = getApiBase();
 
@@ -29,31 +29,13 @@ async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-function mockReply(content: string) {
-  if (content === "__START_SESSION__") {
-    return "안녕하세요. 오늘 어떤 이야기를 나눠볼까요?";
-  }
-
-  if (content.includes("학교")) {
-    return "학교 다니실 때 기억나는 풍경이 있으세요?";
-  }
-
-  if (content.includes("가족")) {
-    return "가족분들과 계실 때 가장 따뜻했던 순간은 언제셨어요?";
-  }
-
-  return "그 이야기를 조금 더 들려주실 수 있으세요?";
-}
-
 export async function login(username: string, password: string): Promise<AuthResult> {
-  if (!API_BASE && canUseDemoMode()) {
-    return fetchJson<AuthResult>("/api/demo/login", {
+  if (!API_BASE) {
+    return fetchJson<AuthResult>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ username, password }),
     });
   }
-
-  assertApiConfigured();
 
   return fetchJson<AuthResult>(`${API_BASE}/auth/login`, {
     method: "POST",
@@ -62,11 +44,15 @@ export async function login(username: string, password: string): Promise<AuthRes
 }
 
 export async function startSession(userId: string, token: string) {
-  if (!API_BASE && canUseDemoMode()) {
-    return { sessionId: makeId("session") };
+  if (!API_BASE) {
+    return fetchJson<{ sessionId: string }>("/api/session/start", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId }),
+    });
   }
-
-  assertApiConfigured();
 
   return fetchJson<{ sessionId: string }>(`${API_BASE}/session/start`, {
     method: "POST",
@@ -83,13 +69,20 @@ export async function sendMessage(
   content: string,
   token: string,
 ) {
-  if (!API_BASE && canUseDemoMode()) {
-    return {
-      reply: mockReply(content),
-    };
+  if (!API_BASE) {
+    return fetchJson<{ reply: string }>("/api/message", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userId,
+        sessionId,
+        content,
+        userMessage: content,
+      }),
+    });
   }
-
-  assertApiConfigured();
 
   const result = await fetchJson<{ message?: string; reply?: string }>(
     `${API_BASE}/message`,
@@ -117,11 +110,15 @@ export async function endSession(
   sessionId: string,
   token: string,
 ) {
-  if (!API_BASE && canUseDemoMode()) {
-    return { ok: true };
+  if (!API_BASE) {
+    return fetchJson<{ ok?: boolean }>("/api/session/end", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId, sessionId }),
+    });
   }
-
-  assertApiConfigured();
 
   return fetchJson<{ ok?: boolean }>(`${API_BASE}/session/end`, {
     method: "POST",
@@ -133,27 +130,15 @@ export async function endSession(
 }
 
 export async function getHistory(userId: string, token: string) {
-  if (!API_BASE && canUseDemoMode()) {
-    const now = new Date();
-    const sessions: HistorySession[] = [
-      {
-        id: "demo-1",
-        startedAt: now.toISOString(),
-        summary: "어린 시절 살던 동네와 학교 이야기를 나눴어요.",
-        messageCount: 14,
+  if (!API_BASE) {
+    return fetchJson<{ sessions: HistorySession[] }>("/api/session/history", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-      {
-        id: "demo-2",
-        startedAt: new Date(now.getTime() - 86400000).toISOString(),
-        summary: "가족과 함께 보낸 명절의 기억을 떠올렸어요.",
-        messageCount: 11,
-      },
-    ];
-
-    return { sessions };
+      body: JSON.stringify({ userId }),
+    });
   }
-
-  assertApiConfigured();
 
   const result = await fetchJson<{
     sessions: Array<{
