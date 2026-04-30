@@ -193,10 +193,12 @@ export default function ConversationPage() {
         setLiveTranscript("");
         setPending(false);
         await speakText(reply);
-      } catch {
+      } catch (turnError) {
         setPending(false);
         setPhase("idle");
-        setError("응답을 가져오지 못했어요.");
+        setError(
+          turnError instanceof Error ? turnError.message : "응답을 가져오지 못했어요.",
+        );
       }
     },
     [auth, sessionId, speakText],
