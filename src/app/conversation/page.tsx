@@ -398,7 +398,7 @@ export default function ConversationPage() {
         <div className="flex-1 overflow-y-auto pb-4">
           {messages.length === 0 && !pending ? (
             <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[var(--remain-primary-soft)] text-3xl">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[var(--remain-primary-soft)] text-3xl text-[var(--remain-primary)]">
                 🎙
               </div>
               <div>
@@ -418,7 +418,7 @@ export default function ConversationPage() {
                     className={`flex items-start gap-2 ${isUser ? "justify-end" : "justify-start"}`}
                   >
                     {!isUser ? (
-                      <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--remain-primary-soft)]">
+                      <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--remain-primary-soft)] text-[var(--remain-primary)]">
                         ✦
                       </div>
                     ) : null}
@@ -442,7 +442,7 @@ export default function ConversationPage() {
 
               {pending ? (
                 <div className="flex items-start gap-2">
-                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--remain-primary-soft)]">
+                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--remain-primary-soft)] text-[var(--remain-primary)]">
                     ✦
                   </div>
                   <div className="rounded-2xl rounded-bl-sm border border-[var(--remain-border)] bg-white px-4 py-3">

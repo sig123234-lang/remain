@@ -11,9 +11,9 @@ const sizes = {
 export function Logo({ size = "md" }: LogoProps) {
   return (
     <div className={`inline-flex items-baseline font-black ${sizes[size]}`}>
-      <span className="text-white">rem</span>
+      <span className="text-[var(--remain-primary)]">rem</span>
       <span className="text-[#378ADD]">AI</span>
-      <span className="text-white">n</span>
+      <span className="text-[var(--remain-primary)]">n</span>
     </div>
   );
 }
