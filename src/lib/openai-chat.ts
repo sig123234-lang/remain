@@ -1,6 +1,7 @@
 import { generateDemoTurn } from "@/lib/demo-reminiscence";
 import { canUseDemoMode } from "@/lib/config";
 import {
+  REMINISCENCE_FEW_SHOTS,
   buildReminiscenceSystemPrompt,
   type ReminiscenceProfile,
 } from "@/lib/reminiscence-prompt";
@@ -78,6 +79,19 @@ function buildConversationPrompt(currentInput: string, history: ChatMessage[]) {
   ].join("\n");
 }
 
+function buildFewShotMessages() {
+  return REMINISCENCE_FEW_SHOTS.flatMap((example) => [
+    {
+      role: "user" as const,
+      content: buildConversationPrompt(example.user, []),
+    },
+    {
+      role: "assistant" as const,
+      content: JSON.stringify(example.assistant),
+    },
+  ]);
+}
+
 function demoFallback(input: string, profile?: ReminiscenceProfile | null): StructuredTurn {
   const result = generateDemoTurn(input, profile);
 
@@ -122,6 +136,7 @@ export async function generateAssistantTurn(params: {
           role: "system",
           content: buildReminiscenceSystemPrompt(params.profile),
         },
+        ...buildFewShotMessages(),
         {
           role: "user",
           content: buildConversationPrompt(params.input, params.history),

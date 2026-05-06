@@ -3,16 +3,18 @@ import { findUserById } from "@/lib/admin-store";
 import { isAuthorizedUser } from "@/lib/local-auth";
 import {
   addSessionMessage,
+  ensureSession,
   getRecentMessages,
-  getSession,
 } from "@/lib/local-session-store";
 import { generateAssistantTurn } from "@/lib/openai-chat";
+import type { ChatMessage } from "@/lib/types";
 
 export async function POST(request: Request) {
-  const { userId, sessionId, content } = (await request.json()) as {
+  const { userId, sessionId, content, history } = (await request.json()) as {
     userId?: string;
     sessionId?: string;
     content?: string;
+    history?: ChatMessage[];
   };
 
   if (!userId || !sessionId || !content) {
@@ -26,7 +28,7 @@ export async function POST(request: Request) {
   }
 
   const user = findUserById(userId);
-  const session = getSession(sessionId);
+  const session = ensureSession(sessionId, userId);
 
   if (!user || !session || session.userId !== userId) {
     return new NextResponse("세션 정보를 찾지 못했습니다.", { status: 404 });
@@ -40,9 +42,14 @@ export async function POST(request: Request) {
   }
 
   try {
+    const recentHistory =
+      getRecentMessages(sessionId).length > 0
+        ? getRecentMessages(sessionId)
+        : (history ?? []).slice(-12);
+
     const result = await generateAssistantTurn({
       input: content,
-      history: getRecentMessages(sessionId),
+      history: recentHistory,
       profile: {
         nickname: user.name,
       },

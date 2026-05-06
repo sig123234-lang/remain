@@ -1,6 +1,7 @@
 import type {
   AdminUser,
   AuthResult,
+  ChatMessage,
   HistorySession,
   SessionStats,
 } from "@/lib/types";
@@ -68,6 +69,7 @@ export async function sendMessage(
   sessionId: string,
   content: string,
   token: string,
+  history: ChatMessage[] = [],
 ) {
   if (!API_BASE) {
     return fetchJson<{ reply: string }>("/api/message", {
@@ -79,6 +81,7 @@ export async function sendMessage(
         userId,
         sessionId,
         content,
+        history,
         userMessage: content,
       }),
     });
@@ -95,6 +98,7 @@ export async function sendMessage(
         userId,
         sessionId,
         content,
+        history,
         userMessage: content,
       }),
     },

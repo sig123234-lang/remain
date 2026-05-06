@@ -177,6 +177,11 @@ export default function ConversationPage() {
         return;
       }
 
+      const requestHistory =
+        userText === "__START_SESSION__"
+          ? messages
+          : [...messages, createMessage("user", userText)];
+
       if (userText !== "__START_SESSION__") {
         setMessages((prev) => [...prev, createMessage("user", userText)]);
       }
@@ -186,7 +191,13 @@ export default function ConversationPage() {
       setError("");
 
       try {
-        const response = await sendMessage(auth.userId, sessionId, userText, auth.token);
+        const response = await sendMessage(
+          auth.userId,
+          sessionId,
+          userText,
+          auth.token,
+          requestHistory,
+        );
         const reply = response.reply || welcomeMessage(auth.name);
         setMessages((prev) => [...prev, createMessage("assistant", reply)]);
         transcriptRef.current = "";
@@ -201,7 +212,7 @@ export default function ConversationPage() {
         );
       }
     },
-    [auth, sessionId, speakText],
+    [auth, messages, sessionId, speakText],
   );
 
   const submitTranscript = useCallback(

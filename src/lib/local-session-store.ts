@@ -56,6 +56,25 @@ export function getSession(sessionId: string) {
   return sessions.get(sessionId) ?? null;
 }
 
+export function ensureSession(sessionId: string, userId: string) {
+  const existing = sessions.get(sessionId);
+  if (existing) {
+    return existing;
+  }
+
+  const session: SessionRecord = {
+    id: sessionId,
+    userId,
+    startedAt: new Date().toISOString(),
+    endedAt: null,
+    messages: [],
+    summary: "오늘 나눈 이야기를 기록하고 있어요.",
+  };
+
+  sessions.set(sessionId, session);
+  return session;
+}
+
 export function addSessionMessage(
   sessionId: string,
   message: Pick<ChatMessage, "role" | "content">,
