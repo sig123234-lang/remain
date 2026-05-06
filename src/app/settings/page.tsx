@@ -77,8 +77,8 @@ export default function SettingsPage() {
                     key={option.key}
                     className={`flex-1 rounded-xl border-2 px-2 py-3 transition-all ${
                       selected
-                        ? "border-[var(--remain-primary)] bg-[var(--remain-primary-soft)]"
-                        : "border-[var(--remain-border)] bg-[var(--remain-surface-muted)]"
+                        ? "border-[var(--remain-primary)] bg-[var(--remain-primary-soft)] shadow-[0_10px_24px_rgba(31,45,74,0.10)]"
+                        : "border-[var(--remain-border)] bg-white"
                     }`}
                     onClick={() =>
                       updatePreferences({ ...preferences, fontSize: option.key })
@@ -86,12 +86,12 @@ export default function SettingsPage() {
                     type="button"
                   >
                     <p
-                      className={`font-medium ${selected ? "text-[var(--remain-primary)]" : "text-[var(--remain-muted)]"}`}
+                      className={`font-semibold ${selected ? "text-[var(--remain-primary)]" : "text-[var(--remain-text)]"}`}
                       style={{ fontSize: FONT_SIZE_STYLE[option.key] }}
                     >
                       가
                     </p>
-                    <p className="mt-1 text-[10px] text-[var(--remain-muted)]">{option.label}</p>
+                    <p className="mt-1 text-[11px] text-[var(--remain-muted)]">{option.label}</p>
                   </button>
                 );
               })}
@@ -134,14 +134,14 @@ export default function SettingsPage() {
                   key={option.key}
                   className={`rounded-xl border-2 px-2 py-3 transition-all ${
                     selected
-                      ? "border-[var(--remain-primary)] bg-[var(--remain-primary-soft)]"
-                      : "border-[var(--remain-border)] bg-[var(--remain-surface-muted)]"
+                      ? "border-[var(--remain-primary)] bg-[var(--remain-primary-soft)] shadow-[0_10px_24px_rgba(31,45,74,0.10)]"
+                      : "border-[var(--remain-border)] bg-white"
                   }`}
                   onClick={() => updatePreferences({ ...preferences, ttsSpeed: option.key })}
                   type="button"
                 >
                   <p className="text-lg">{option.emoji}</p>
-                  <p className="mt-1 text-xs font-medium text-[var(--remain-text)]">{option.label}</p>
+                  <p className="mt-1 text-xs font-semibold text-[var(--remain-text)]">{option.label}</p>
                   <p className="mt-1 text-[10px] text-[var(--remain-muted)]">{option.sub}</p>
                 </button>
               );
@@ -164,8 +164,8 @@ export default function SettingsPage() {
                   key={option.key}
                   className={`rounded-xl border-2 px-2 py-3 transition-all ${
                     selected
-                      ? "border-[var(--remain-primary)] bg-[var(--remain-primary-soft)]"
-                      : "border-[var(--remain-border)] bg-[var(--remain-surface-muted)]"
+                      ? "border-[var(--remain-primary)] bg-[var(--remain-primary-soft)] shadow-[0_10px_24px_rgba(31,45,74,0.10)]"
+                      : "border-[var(--remain-border)] bg-white"
                   }`}
                   onClick={() =>
                     updatePreferences({ ...preferences, recordingDuration: option.key })
@@ -173,7 +173,7 @@ export default function SettingsPage() {
                   type="button"
                 >
                   <p className="text-lg">{option.emoji}</p>
-                  <p className="mt-1 text-xs font-medium text-[var(--remain-text)]">{option.label}</p>
+                  <p className="mt-1 text-xs font-semibold text-[var(--remain-text)]">{option.label}</p>
                   <p className="mt-1 text-[10px] text-[var(--remain-muted)]">{option.sub}</p>
                 </button>
               );

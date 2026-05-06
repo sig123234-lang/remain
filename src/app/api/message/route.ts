@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { findUserById } from "@/lib/admin-store";
 import { isAuthorizedUser } from "@/lib/local-auth";
 import {
   addSessionMessage,
@@ -10,11 +9,12 @@ import { generateAssistantTurn } from "@/lib/openai-chat";
 import type { ChatMessage } from "@/lib/types";
 
 export async function POST(request: Request) {
-  const { userId, sessionId, content, history } = (await request.json()) as {
+  const { userId, sessionId, content, history, userName } = (await request.json()) as {
     userId?: string;
     sessionId?: string;
     content?: string;
     history?: ChatMessage[];
+    userName?: string;
   };
 
   if (!userId || !sessionId || !content) {
@@ -27,10 +27,9 @@ export async function POST(request: Request) {
     return new NextResponse("인증이 올바르지 않습니다.", { status: 401 });
   }
 
-  const user = findUserById(userId);
   const session = ensureSession(sessionId, userId);
 
-  if (!user || !session || session.userId !== userId) {
+  if (!session || session.userId !== userId) {
     return new NextResponse("세션 정보를 찾지 못했습니다.", { status: 404 });
   }
 
@@ -51,7 +50,7 @@ export async function POST(request: Request) {
       input: content,
       history: recentHistory,
       profile: {
-        nickname: user.name,
+        nickname: userName ?? "어르신",
       },
     });
 

@@ -197,6 +197,7 @@ export default function ConversationPage() {
           userText,
           auth.token,
           requestHistory,
+          auth.name,
         );
         const reply = response.reply || welcomeMessage(auth.name);
         setMessages((prev) => [...prev, createMessage("assistant", reply)]);

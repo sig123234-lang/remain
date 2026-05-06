@@ -70,6 +70,7 @@ export async function sendMessage(
   content: string,
   token: string,
   history: ChatMessage[] = [],
+  userName?: string,
 ) {
   if (!API_BASE) {
     return fetchJson<{ reply: string }>("/api/message", {
@@ -82,6 +83,7 @@ export async function sendMessage(
         sessionId,
         content,
         history,
+        userName,
         userMessage: content,
       }),
     });
@@ -99,6 +101,7 @@ export async function sendMessage(
         sessionId,
         content,
         history,
+        userName,
         userMessage: content,
       }),
     },

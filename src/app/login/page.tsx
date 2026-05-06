@@ -51,7 +51,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="remain-card w-full max-w-xs rounded-[28px] bg-white/90 p-6 backdrop-blur-sm">
+          <div className="remain-card w-full max-w-xs rounded-[28px] bg-white/95 p-6 backdrop-blur-sm">
             <form className="space-y-3" onSubmit={handleSubmit}>
               <input
                 className="h-12 w-full rounded-xl border border-[var(--remain-border)] bg-[var(--remain-surface)] px-4 text-base text-[var(--remain-text)] outline-none placeholder:text-[var(--remain-muted-2)]"

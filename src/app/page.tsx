@@ -61,7 +61,7 @@ export default function Page() {
             <Link className="remain-primary-button flex w-full justify-center" href="/login">
               시작하기 →
             </Link>
-            <p className="rounded-2xl border border-[var(--remain-border)] bg-white/65 px-4 py-3 text-xs leading-5 text-[var(--remain-muted)]">
+            <p className="rounded-2xl border border-[var(--remain-border)] bg-white/85 px-4 py-3 text-xs leading-5 text-[var(--remain-muted)]">
               어르신 계정은 관리자 화면에서 미리 만들어드릴 수 있어요
             </p>
           </div>

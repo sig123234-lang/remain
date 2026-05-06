@@ -92,10 +92,11 @@ textarea {
 
 .remain-bottom-nav {
   flex-shrink: 0;
-  border-top: 1px solid var(--remain-border);
-  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(23, 31, 55, 0.14);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(16px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -10px 30px rgba(24, 29, 45, 0.06);
 }
 
 .remain-gradient-card {

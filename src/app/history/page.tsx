@@ -38,7 +38,7 @@ export default function HistoryPage() {
                 {auth ? `${auth.name} 님과 나눈 소중한 이야기입니다.` : ""}
               </p>
             </div>
-            <Link className="text-xs text-[var(--remain-muted)] underline underline-offset-2" href="/conversation">
+            <Link className="text-xs font-medium text-[var(--remain-primary)] underline underline-offset-2" href="/conversation">
               새 대화
             </Link>
           </div>
