@@ -68,15 +68,11 @@ textarea {
 
 .remain-mobile-shell {
   display: flex;
-  height: calc(100vh - 3rem);
+  min-height: 100vh;
   width: 100%;
-  max-width: 430px;
   flex-direction: column;
   overflow: hidden;
   background: linear-gradient(160deg, var(--remain-bg) 0%, var(--remain-bg-2) 100%);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 22px 70px rgba(0, 0, 0, 0.12);
 }
 
 .remain-page {
@@ -161,6 +157,26 @@ textarea {
     rgba(237, 232, 223, 0.92) 55%,
     rgba(238, 240, 247, 0.92) 100%
   );
+}
+
+@media (min-width: 768px) {
+  .remain-app-header {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .remain-page > * {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+
+  .remain-bottom-nav > div {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .panel {
